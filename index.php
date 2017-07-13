@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\RouteCollectionBuilder;
+use MicroApp\Entity\Article;
 
 // require Composer's autoloader
 require __DIR__.'/vendor/autoload.php';
@@ -18,40 +19,59 @@ class AppKernel extends Kernel
 
     public function registerBundles()
     {
-        return array(
-            new Symfony\Bundle\FrameworkBundle\FrameworkBundle()
-        );
+        return [
+            new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
+            new Doctrine\Bundle\DoctrineBundle\DoctrineBundle()
+        ];
     }
 
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
-        // PHP equivalent of config.yml
-        $c->loadFromExtension('framework', array(
+        $c->loadFromExtension('framework', [
             'secret' => 'S0ME_SECRET'
-        ));
+        ]);
+        
+        $c->loadFromExtension('doctrine', [
+            'dbal' => [
+                'driver' => 'pdo_mysql',
+                'host' => '127.0.0.1',
+                'port' => null,
+                'dbname' => 'symfony-micro',
+                'user' => 'root',
+                'password' => '',
+                'charset' => 'UTF8'
+            ],
+            'orm' => [
+                'auto_generate_proxy_classes' => false,
+                'auto_mapping' => true,
+                'mappings' => [
+                    'App' => [
+                        'is_bundle' => false,
+                        'type' => 'annotation',
+                        'dir' => Kernel::getRootDir().'/src/MicroApp/Entity',
+                        'prefix' => 'MicroApp\Entity\\'
+                    ]
+                ]
+            ]
+        ]);
+
     }
 
     protected function configureRoutes(RouteCollectionBuilder $routes)
     {
-        // kernel is a service that points to this class
-        // optional 3rd argument is the route name
-        $routes->add('/random/{limit}', 'kernel:randomAction');
-        $routes->add('/hello/{name}', 'kernel:helloAction', 'hello');
-    }
-
-    public function randomAction($limit)
-    {
-        return new JsonResponse(array(
-            'number' => rand(0, $limit)
-        ));
+        $routes->add('/test', 'kernel:testAction', 'test');
     }
     
-    public function helloAction($name)
+    public function testAction()
     {
+        
+        $articles = $this->container->get('doctrine')->getRepository(Article::class)->findAll();
+        echo '<pre>';
+        print_r($articles);
         $response = new Response(
-            '<h1>Hi, '.$name.' it is a micro kernel.</h2>',
+            '<h1>TEST</h2>',
             Response::HTTP_OK,
-            array('content-type' => 'text/html')
+            ['content-type' => 'text/html']
         );
         
         return $response;
