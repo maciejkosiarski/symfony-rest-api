@@ -34,9 +34,9 @@ class AppKernel extends Kernel
                 'driver' => 'pdo_mysql',
                 'host' => '127.0.0.1',
                 'port' => null,
-                'dbname' => 'symfony-micro',
-                'user' => 'root',
-                'password' => '',
+                'dbname' => 'your_dbname',
+                'user' => 'your_user',
+                'password' => 'your_pass',
                 'charset' => 'UTF8'
             ]
         ]);
