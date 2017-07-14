@@ -50,13 +50,13 @@ class AppKernel extends Kernel
             ->setMethods('GET');
         $routes->add('/api/article', 'kernel:newAction', 'api_article_new')
             ->setMethods('POST');
-        $routes->add('/api/article', 'kernel:editAction', 'api_article_edit')
+        $routes->add('/api/article/{id}', 'kernel:editAction', 'api_article_edit')
             ->setMethods('PUT');
-        $routes->add('/api/article', 'kernel:deleteAction', 'api_article_delete')
+        $routes->add('/api/article/{id}', 'kernel:deleteAction', 'api_article_delete')
             ->setMethods('DELETE');
     }
     
-    public function indexAction(Request $request)
+    public function indexAction()
     {
         try {
             $articles = $this->container->get('doctrine.dbal.default_connection')
@@ -108,7 +108,7 @@ class AppKernel extends Kernel
         return new JsonResponse(null, 400);
     }
     
-    public function editAction(Request $request)
+    public function editAction(Request $request, $id)
     {   
         try {
             $conn = $this->container->get('doctrine.dbal.default_connection');
@@ -117,7 +117,7 @@ class AppKernel extends Kernel
             $stmt->bindParam(':title',$request->request->get('title'), PDO::PARAM_STR);
             $stmt->bindParam(':content',$request->request->get('content'), PDO::PARAM_STR);
             $stmt->bindParam(':quantity',$request->request->get('quantity'), PDO::PARAM_INT);
-            $stmt->bindParam(':id',$request->request->get('id'), PDO::PARAM_INT);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             
             if($stmt->execute()){
                 return new JsonResponse(null, 200);
@@ -130,13 +130,13 @@ class AppKernel extends Kernel
         return new JsonResponse(null, 400);
     }
     
-    public function deleteAction(Request $request)
+    public function deleteAction($id)
     {
         try {
             $conn = $this->container->get('doctrine.dbal.default_connection');
 
             $stmt = $conn->prepare('DELETE FROM article WHERE id = :id');
-            $stmt->bindParam(':id', $request->request->get('id'), PDO::PARAM_INT);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             
             if($stmt->execute()){
                 return new JsonResponse(null, 200);
