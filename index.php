@@ -19,6 +19,7 @@ class AppKernel extends Kernel
     {
         return [
             new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
+            new Symfony\Bundle\SecurityBundle\SecurityBundle(),
             new Doctrine\Bundle\DoctrineBundle\DoctrineBundle()
         ];
     }
@@ -34,11 +35,42 @@ class AppKernel extends Kernel
                 'driver' => 'pdo_mysql',
                 'host' => '127.0.0.1',
                 'port' => null,
-                'dbname' => 'your_dbname',
-                'user' => 'your_user',
-                'password' => 'your_pass',
+                'dbname' => 'symfony-micro',
+                'user' => 'root',
+                'password' => '',
                 'charset' => 'UTF8'
             ]
+        ]);
+        
+        $c->loadFromExtension('security', [
+            'providers' => [
+                'in_memory' => [
+                    'memory' => [
+                        'users' => [
+                            'admin' => [
+                                'password' => 'secretpass',
+                                'roles' => 'ROLE_ADMIN'
+                            ]
+                        ]
+                    ],
+                ],
+            ],
+            'encoders' => [
+                'Symfony\Component\Security\Core\User\User' => 'plaintext'
+            ],
+            'firewalls' => [
+                'dev' => [
+                    'pattern'   => '^/(_(profiler|wdt)|css|images|js)/',
+                    'security'  => false,
+                ],
+                'main' => [
+                    'anonymous' => null,
+                    'http_basic' => null
+                ],
+            ],
+            'access_control' => [
+                 ['path' => '^/api', 'roles' => 'ROLE_ADMIN'],
+             ],
         ]);
     }
 
@@ -151,7 +183,7 @@ class AppKernel extends Kernel
     
 }
 
-$kernel = new AppKernel('dev', true);
+$kernel = new AppKernel('prod', false);
 $request = Request::createFromGlobals();
 $response = $kernel->handle($request);
 $response->send();
