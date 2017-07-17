@@ -40,3 +40,26 @@ Your api is now available at http://localhost/symfony-rest-api/index.php/api/art
 `PUT    ->   api/article/{id}`
 
 `DELETE ->   api/article/{id}`
+
+### Authentication
+
+user: admin
+
+pass: secretpass
+
+Configure security in `configureContainer` method:
+
+        $c->loadFromExtension('security', [
+            'providers' => [
+                'in_memory' => [
+                    'memory' => [
+                        'users' => [
+                            'admin' => [
+                                'password' => 'secretpass',
+                                'roles' => 'ROLE_ADMIN'
+                            ]
+                        ]
+                    ],
+                ],
+            ],
+            ...
